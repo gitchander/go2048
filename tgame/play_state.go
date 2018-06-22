@@ -18,14 +18,15 @@ var _ State = &PlayState{}
 
 func NewPlayState(sm *StateManager) *PlayState {
 
-	size := image.Point{4, 4}
-	//size := image.Point{3, 3}
+	//size := image.Point{4, 4}
+	//size := image.Point{8, 8}
 
 	cellSize := image.Point{7, 3}
 	//cellSize := image.Point{4, 1}
+	drawer := NewDrawer(cellSize)
 
-	drawer := NewDrawer(size, cellSize)
-	gm := game.NewGameManager(size, sm.storage, drawer)
+	gm := game.NewGameManager(sm.storage, drawer)
+
 	var inputManager game.InputManager = gm
 
 	return &PlayState{

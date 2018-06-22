@@ -7,16 +7,13 @@ import (
 )
 
 var random = func() func() float64 {
-
 	values := make(chan float64)
-
 	go func() {
 		r := rand.New(rand.NewSource(time.Now().UnixNano()))
 		for {
 			values <- r.Float64()
 		}
 	}()
-
 	return func() float64 {
 		return <-values
 	}

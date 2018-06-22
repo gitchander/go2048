@@ -14,7 +14,7 @@ type tilesDrawer struct {
 	cellSize   image.Point
 	fg, bg     termbox.Attribute
 	valueRunes map[int][]rune
-	tiles      []game.Tile
+	tiles      []*game.Tile
 }
 
 func (td *tilesDrawer) SetScreenSize(size image.Point) {
@@ -54,36 +54,34 @@ func (td *tilesDrawer) Draw(t float64) {
 		}
 	}
 
-	/*
-		{
-			if tile.PreviousPosition != nil {
-				if t < maxT {
-					drawMoveTile(vd, tile.Value, *(tile.PreviousPosition), tile.Position, t/maxT)
-				} else {
-					drawTile(vd, tile.Value, tile.Position)
-				}
-			} else if tile.MergedFrom != nil {
-				if t < maxT {
-					mergedTiles := tile.MergedFrom
-					for _, merged := range mergedTiles {
-						prevPos := merged.Position
-						if merged.PreviousPosition != nil {
-							prevPos = *(merged.PreviousPosition)
-						}
-						drawMoveTile(vd, merged.Value, prevPos, tile.Position, t/maxT)
-					}
-				} else {
-					drawTile(vd, tile.Value, tile.Position)
-				}
-			} else {
-				if t > maxT {
-					if (int(math.Floor(t*20)) % 2) == 0 {
-						drawTile(vd, tile.Value, tile.Position)
-					}
-				}
-			}
-		}
-	*/
+	//	{
+	//		if tile.PreviousPosition != nil {
+	//			if t < maxT {
+	//				drawMoveTile(vd, tile.Value, *(tile.PreviousPosition), tile.Position, t/maxT)
+	//			} else {
+	//				drawTile(vd, tile.Value, tile.Position)
+	//			}
+	//		} else if tile.MergedFrom != nil {
+	//			if t < maxT {
+	//				mergedTiles := tile.MergedFrom
+	//				for _, merged := range mergedTiles {
+	//					prevPos := merged.Position
+	//					if merged.PreviousPosition != nil {
+	//						prevPos = *(merged.PreviousPosition)
+	//					}
+	//					drawMoveTile(vd, merged.Value, prevPos, tile.Position, t/maxT)
+	//				}
+	//			} else {
+	//				drawTile(vd, tile.Value, tile.Position)
+	//			}
+	//		} else {
+	//			if t > maxT {
+	//				if (int(math.Floor(t*20)) % 2) == 0 {
+	//					drawTile(vd, tile.Value, tile.Position)
+	//				}
+	//			}
+	//		}
+	//	}
 }
 
 func (td *tilesDrawer) drawMoveTile(value int, begin, end image.Point, t float64) {

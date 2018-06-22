@@ -1,6 +1,8 @@
 package go2048
 
-import "image"
+import (
+	"image"
+)
 
 type gameState struct {
 	Score       int
@@ -8,27 +10,25 @@ type gameState struct {
 	Won         bool
 	KeepPlaying bool
 	Size        image.Point
-	Tiles       []Tile
+	Tiles       []*Tile
 }
 
 type GameManager struct {
-	defaultSize    image.Point
 	score          int
 	over           bool
 	won            bool
 	keepPlaying    bool
 	grid           *grid
-	mapTraversals  map[Direction]traversals
+	mapTraversals  map[Direction]*traversals
 	storageManager *StorageManager
 	actuator       *Actuator
 	startTiles     int
 }
 
-func NewGameManager(defaultSize image.Point, storage Storage, ar AnimationRequester) *GameManager {
+func NewGameManager(storage Storage, ar AnimationRequester) *GameManager {
 
 	gm := &GameManager{
-		defaultSize: defaultSize,
-		grid:        newGrid(defaultSize),
+		//grid:        newGrid(defaultSize),
 		//mapTraversals:  buildMapTraversals(defaultSize),
 		storageManager: NewStorageManager(storage),
 		actuator:       &Actuator{ar},
@@ -38,6 +38,48 @@ func NewGameManager(defaultSize image.Point, storage Storage, ar AnimationReques
 	gm.setup()
 
 	return gm
+}
+
+func (gm *GameManager) setup() {
+
+	size := DefaultSize()
+
+	var previousState, _ = gm.storageManager.getGameState()
+
+	// Reload the game from a previous game if present
+	if previousState != nil {
+
+		size = previousState.Size
+		grid := newGrid(size)
+		for _, t := range previousState.Tiles {
+			grid.insertTile(newTile(t.Position, t.Value))
+		}
+
+		gm.grid = grid // Reload grid
+		gm.mapTraversals = makeMapTraversals(size)
+
+		gm.score = previousState.Score
+		gm.over = previousState.Over
+		gm.won = previousState.Won
+		gm.keepPlaying = previousState.KeepPlaying
+
+	} else {
+		gm.grid = newGrid(size)
+		gm.mapTraversals = makeMapTraversals(size)
+
+		gm.score = 0
+		gm.over = false
+		gm.won = false
+		gm.keepPlaying = false
+
+		// Add the initial tiles
+		gm.addStartTiles()
+	}
+
+	gm.actuator.ar.Init(size)
+
+	// Update the actuator
+	gm.actuate()
 }
 
 // Set up the initial tiles to start the game with
@@ -50,52 +92,15 @@ func (gm *GameManager) addStartTiles() {
 // Restart the game
 func (gm *GameManager) Restart() {
 	gm.storageManager.clearGameState()
-	gm.actuator.continueGame() // Clear the game won/lost message
 	gm.setup()
+	//gm.actuator.continueGame() // Clear the game won/lost message
+
 }
 
 // Keep playing after winning (allows going over 2048)
 func (gm *GameManager) KeepPlaying() {
 	gm.keepPlaying = true
 	gm.actuator.continueGame() // Clear the game won/lost message
-}
-
-func (gm *GameManager) setup() {
-
-	var previousState, _ = gm.storageManager.getGameState()
-
-	// Reload the game from a previous game if present
-	if previousState != nil {
-
-		size := previousState.Size
-		grid := newGrid(size)
-		for _, t := range previousState.Tiles {
-			grid.insertTile(newTile(t.Position, t.Value))
-		}
-
-		gm.grid = grid // Reload grid
-		gm.mapTraversals = buildMapTraversals(size)
-
-		gm.score = previousState.Score
-		gm.over = previousState.Over
-		gm.won = previousState.Won
-		gm.keepPlaying = previousState.KeepPlaying
-
-	} else {
-		gm.grid = newGrid(gm.defaultSize)
-		gm.mapTraversals = buildMapTraversals(gm.defaultSize)
-
-		gm.score = 0
-		gm.over = false
-		gm.won = false
-		gm.keepPlaying = false
-
-		// Add the initial tiles
-		gm.addStartTiles()
-	}
-
-	// Update the actuator
-	gm.actuate()
 }
 
 // Sends the updated grid to the actuator
@@ -105,21 +110,17 @@ func (gm *GameManager) actuate() {
 		gm.storageManager.setBestScore(gm.score)
 	}
 
+	var tiles []*Tile
+	gm.grid.forEach(
+		func(t *Tile) {
+			tiles = append(tiles, t)
+		},
+	)
+
 	// Clear the state when the game is over (game over only, not win)
 	if gm.over {
 		gm.storageManager.clearGameState()
 	} else {
-
-		var tiles []Tile
-		gm.grid.forEach(
-			func(t *Tile) {
-				tc := Tile{
-					Position: t.Position,
-					Value:    t.Value,
-				}
-				tiles = append(tiles, tc)
-			},
-		)
 
 		state := gameState{
 			Score:       gm.score,
@@ -135,7 +136,8 @@ func (gm *GameManager) actuate() {
 
 	terminated := gm.isGameTerminated()
 
-	gm.actuator.actuate(gm.grid,
+	gm.actuator.actuate(
+		tiles,
 		gm.score,
 		gm.storageManager.getBestScore(),
 		gm.over,
@@ -152,10 +154,7 @@ func (gm *GameManager) isGameTerminated() bool {
 // Move tiles on the grid in the specified direction
 func (gm *GameManager) Move(d Direction) {
 
-	vector, ok := directionVector[d]
-	if !ok {
-		return
-	}
+	vector := d.getVector()
 
 	if gm.isGameTerminated() {
 		// Don't do anything if the game's over
@@ -169,7 +168,7 @@ func (gm *GameManager) Move(d Direction) {
 
 	// Traverse the grid in the right direction and move tiles
 	t := gm.mapTraversals[d]
-	t.forEach(
+	t.Range(
 		func(cell image.Point) {
 			current := gm.grid.cellContent(cell)
 			if current != nil {
@@ -179,7 +178,7 @@ func (gm *GameManager) Move(d Direction) {
 				// Only one merger per row traversal?
 				if (next != nil) && (next.Value == current.Value) && (next.MergedFrom == nil) {
 
-					var merged = mergeTiles(positions.next, []*Tile{current, next})
+					var merged = mergeTiles(positions.next, current, next)
 
 					gm.grid.insertTile(merged)
 					gm.grid.removeTile(current)
@@ -246,4 +245,8 @@ func (gm *GameManager) UndoMove() {
 
 func (gm *GameManager) Draw() {
 	gm.actuate()
+}
+
+func (gm *GameManager) DataTable() []byte {
+	return encodePrintableTest(gm.grid)
 }

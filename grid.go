@@ -2,55 +2,36 @@ package go2048
 
 import "image"
 
-var DefaultSize = image.Point{4, 4}
-
-type grid struct {
-	tiles [][]*Tile
+func DefaultSize() image.Point {
+	return image.Point{4, 4}
 }
 
-func tilesFromSize(size image.Point) [][]*Tile {
-	tiles := make([][]*Tile, size.X)
-	for x := range tiles {
-		tiles[x] = make([]*Tile, size.Y)
-	}
-	return tiles
+type grid struct {
+	size image.Point
+	sst  [][]*Tile
 }
 
 func newGrid(size image.Point) *grid {
+	sst := make([][]*Tile, size.X)
+	for x := range sst {
+		sst[x] = make([]*Tile, size.Y)
+	}
 	return &grid{
-		tiles: tilesFromSize(size),
+		size: size,
+		sst:  sst,
 	}
 }
 
 func (g *grid) set(cell image.Point, t *Tile) {
-	g.tiles[cell.X][cell.Y] = t
+	g.sst[cell.X][cell.Y] = t
 }
 
 func (g *grid) get(cell image.Point) *Tile {
-	return g.tiles[cell.X][cell.Y]
+	return g.sst[cell.X][cell.Y]
 }
 
 func (g *grid) Size() image.Point {
-	var size = image.Point{
-		X: len(g.tiles),
-		Y: 0,
-	}
-	for _, ts := range g.tiles {
-		size.Y = max(size.Y, len(ts))
-	}
-	return size
-
-	//	var (
-	//		nX = len(g.tiles)
-	//		nY int
-	//	)
-	//	for _, ts := range g.tiles {
-	//		nY = max(nY, len(ts))
-	//	}
-	//	return image.Point{
-	//		X: nX,
-	//		Y: nY,
-	//	}
+	return g.size
 }
 
 // Inserts a tile at its position
@@ -70,8 +51,8 @@ func (g *grid) moveTile(t *Tile, cell image.Point) {
 }
 
 func (g *grid) availableCells() (cells []image.Point) {
-	for x, ts := range g.tiles {
-		for y, t := range ts {
+	for x, st := range g.sst {
+		for y, t := range st {
 			if t == nil {
 				cells = append(cells, image.Point{x, y})
 			}
@@ -81,8 +62,8 @@ func (g *grid) availableCells() (cells []image.Point) {
 }
 
 func (g *grid) forEach(fn func(*Tile)) {
-	for _, ts := range g.tiles {
-		for _, t := range ts {
+	for _, st := range g.sst {
+		for _, t := range st {
 			if t != nil {
 				fn(t)
 			}
@@ -90,19 +71,19 @@ func (g *grid) forEach(fn func(*Tile)) {
 	}
 }
 
-func (g *grid) forEachCell(fn func(image.Point, *Tile)) {
-	for x, ts := range g.tiles {
-		for y, t := range ts {
-			var cell = image.Point{x, y}
-			fn(cell, t)
-		}
-	}
-}
+//func (g *grid) forEachCell(fn func(image.Point, *Tile)) {
+//	for x, st := range g.sst {
+//		for y, t := range st {
+//			var cell = image.Point{x, y}
+//			fn(cell, t)
+//		}
+//	}
+//}
 
 // Check if there are any cells available
 func (g *grid) cellsAvailable() bool {
-	for _, ts := range g.tiles {
-		for _, t := range ts {
+	for _, st := range g.sst {
+		for _, t := range st {
 			if t == nil {
 				return true
 			}
@@ -127,15 +108,21 @@ func (g *grid) cellContent(cell image.Point) *Tile {
 	return nil
 }
 
+// Use for encodePrintable
+func (g *grid) CellValue(cell image.Point) (val int, ok bool) {
+	if v := g.cellContent(cell); v != nil {
+		return v.Value, true
+	}
+	return 0, false
+}
+
 func (g *grid) withinBounds(cell image.Point) bool {
 
-	nX := len(g.tiles)
-	if (cell.X < 0) || (cell.X >= nX) {
+	if (cell.X < 0) || (cell.X >= g.size.X) {
 		return false
 	}
 
-	nY := len(g.tiles[cell.X])
-	if (cell.Y < 0) || (cell.Y >= nY) {
+	if (cell.Y < 0) || (cell.Y >= g.size.Y) {
 		return false
 	}
 
@@ -165,19 +152,19 @@ func (g *grid) addRandomTile() {
 func (g *grid) prepareTiles() {
 	g.forEach(
 		func(t *Tile) {
-			t.savePosition()
+			t.resetPrevious()
 		},
 	)
 }
 
 // Check for available matches between tiles (more expensive check)
 func (g *grid) tileMatchesAvailable() bool {
-	for x, ts := range g.tiles {
-		for y, t := range ts {
+	for x, st := range g.sst {
+		for y, t := range st {
 			if t != nil {
 				var cell = image.Point{x, y}
 				for _, d := range directions {
-					vector := directionVector[d]
+					vector := d.getVector()
 					other := g.cellContent(cell.Add(vector))
 					if (other != nil) && (other.Value == t.Value) {
 						return true // These two tiles can be merged

@@ -1,6 +1,9 @@
 package go2048
 
-import "strconv"
+import (
+	"image"
+	"strconv"
+)
 
 type MessageKind int
 
@@ -24,11 +27,20 @@ func (mk MessageKind) String() string {
 }
 
 type AnimationRequester interface {
-	AnimationRequest(tiles []Tile)
+	Init(size image.Point)
+	AnimationRequest(tiles []*Tile)
 	UpdateScore(score int)
 	UpdateBestScore(bestScore int)
 	Message(MessageKind)
 }
+
+type DummyAnimationRequester struct{}
+
+func (DummyAnimationRequester) Init(size image.Point)          {}
+func (DummyAnimationRequester) AnimationRequest(tiles []*Tile) {}
+func (DummyAnimationRequester) UpdateScore(score int)          {}
+func (DummyAnimationRequester) UpdateBestScore(bestScore int)  {}
+func (DummyAnimationRequester) Message(MessageKind)            {}
 
 type Actuator struct {
 	ar AnimationRequester
@@ -39,14 +51,14 @@ func (a *Actuator) continueGame() {
 	a.ar.Message(MK_CLEAR)
 }
 
-func (a *Actuator) actuate(g *grid, score int, bestScore int, over bool, won bool, terminated bool) {
+func (a *Actuator) actuate(tiles []*Tile, score int, bestScore int, over bool, won bool, terminated bool) {
 
-	var tiles []Tile
-	g.forEach(
-		func(t *Tile) {
-			tiles = append(tiles, *t)
-		},
-	)
+	//	var tiles []Tile
+	//	g.forEach(
+	//		func(t *Tile) {
+	//			tiles = append(tiles, *t)
+	//		},
+	//	)
 
 	a.ar.AnimationRequest(tiles)
 

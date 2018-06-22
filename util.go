@@ -1,6 +1,7 @@
 package go2048
 
-func serialIntSlice(n int) (d []int) {
+// []int{ 0, 1, 2, 3, ... n-1 }
+func serialInts(n int) (d []int) {
 	if n > 0 {
 		d = make([]int, n)
 		for i := range d {
@@ -10,7 +11,7 @@ func serialIntSlice(n int) (d []int) {
 	return d
 }
 
-func reverseIntSlice(d []int) {
+func reverseInts(d []int) {
 	i, j := 0, len(d)-1
 	for i < j {
 		d[i], d[j] = d[j], d[i]
@@ -18,9 +19,16 @@ func reverseIntSlice(d []int) {
 	}
 }
 
-func max(x, y int) int {
-	if x > y {
-		return x
+func quoRem(a, b int) (quo, rem int) {
+	quo = a / b
+	rem = a - quo*b
+	return
+}
+
+func mod(a, b int) int {
+	d := a % b
+	if d < 0 {
+		d += b
 	}
-	return y
+	return d
 }

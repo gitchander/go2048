@@ -3,8 +3,9 @@ package go2048
 import "image"
 
 type Tile struct {
-	Position         image.Point
-	Value            int
+	Position image.Point
+	Value    int
+
 	PreviousPosition *image.Point `json:"-"`
 	MergedFrom       []*Tile      `json:"-"`
 }
@@ -16,17 +17,18 @@ func newTile(position image.Point, value int) *Tile {
 	}
 }
 
-func (t *Tile) savePosition() {
-	var position = t.Position
-	t.PreviousPosition = &position
+func (t *Tile) resetPrevious() {
+	t.PreviousPosition = nil
 	t.MergedFrom = nil
 }
 
 func (t *Tile) updatePosition(position image.Point) {
+	var prevPos = t.Position
+	t.PreviousPosition = &prevPos
 	t.Position = position
 }
 
-func mergeTiles(pos image.Point, ts []*Tile) *Tile {
+func mergeTiles(pos image.Point, ts ...*Tile) *Tile {
 	if len(ts) != 2 {
 		panic("merged not two tiles")
 	}

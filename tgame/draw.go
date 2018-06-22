@@ -4,6 +4,8 @@ import (
 	"image"
 
 	"github.com/nsf/termbox-go"
+
+	game "github.com/gitchander/go2048"
 )
 
 //func drawBox(bounds image.Rectangle, fg, bg termbox.Attribute) {
@@ -107,7 +109,7 @@ func (d *imageDrawer) Border(bounds image.Rectangle) {
 		}
 	}
 
-	table := tableRune1
+	table := game.BorderTable(1)
 
 	y := bounds.Min.Y
 	if y < bounds.Max.Y {

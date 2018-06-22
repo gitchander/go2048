@@ -33,31 +33,66 @@ type Drawer struct {
 	td               *tilesDrawer
 }
 
-func NewDrawer(gridSize, cellSize image.Point) *Drawer {
+//func NewDrawer(gridSize, cellSize image.Point) *Drawer {
+func NewDrawer(cellSize image.Point) *Drawer {
+
 	return &Drawer{
-		gridSize: gridSize,
 		cellSize: cellSize,
 		animation: animationInfo{
 			duration: 0.1,
 		},
-		gd: &gridDrawer{
-			gridSize: gridSize,
-			cellSize: cellSize,
-			fg:       termbox.ColorCyan | termbox.AttrBold,
-			bg:       termbox.ColorCyan,
-			table:    tableRune1,
-		},
-		td: &tilesDrawer{
-			gridSize:   gridSize,
-			cellSize:   cellSize,
-			fg:         termbox.ColorYellow | termbox.AttrBold,
-			bg:         termbox.ColorBlue,
-			valueRunes: make(map[int][]rune),
-		},
+	}
+
+	//	return &Drawer{
+	//		gridSize: gridSize,
+	//		cellSize: cellSize,
+	//		animation: animationInfo{
+	//			duration: 0.1,
+	//		},
+	//		gd: &gridDrawer{
+	//			gridSize: gridSize,
+	//			cellSize: cellSize,
+	//			fg:       termbox.ColorCyan | termbox.AttrBold,
+	//			bg:       termbox.ColorCyan,
+	//			table:    tableRune1,
+	//		},
+	//		td: &tilesDrawer{
+	//			gridSize:   gridSize,
+	//			cellSize:   cellSize,
+	//			fg:         termbox.ColorYellow | termbox.AttrBold,
+	//			bg:         termbox.ColorBlue,
+	//			valueRunes: make(map[int][]rune),
+	//		},
+	//	}
+}
+
+func (d *Drawer) Init(size image.Point) {
+
+	cellSize := d.cellSize
+
+	d.gridSize = size
+	//cellSize: cellSize,
+	//		animation: animationInfo{
+	//			duration: 0.1,
+	//		},
+
+	d.gd = &gridDrawer{
+		gridSize: size,
+		cellSize: cellSize,
+		fg:       termbox.ColorCyan | termbox.AttrBold,
+		bg:       termbox.ColorCyan,
+		table:    game.BorderTable(5),
+	}
+	d.td = &tilesDrawer{
+		gridSize:   size,
+		cellSize:   cellSize,
+		fg:         termbox.ColorYellow | termbox.AttrBold,
+		bg:         termbox.ColorBlue,
+		valueRunes: make(map[int][]rune),
 	}
 }
 
-func (a *Drawer) AnimationRequest(tiles []game.Tile) {
+func (a *Drawer) AnimationRequest(tiles []*game.Tile) {
 
 	a.animation.start = getTime()
 	a.animation.inProgress = true
