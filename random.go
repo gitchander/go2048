@@ -1,24 +1,23 @@
 package go2048
 
 import (
-	"math"
 	"math/rand"
 	"time"
 )
 
-var random = func() func() float64 {
-	values := make(chan float64)
-	go func() {
-		r := rand.New(rand.NewSource(time.Now().UnixNano()))
-		for {
-			values <- r.Float64()
-		}
-	}()
-	return func() float64 {
-		return <-values
-	}
-}()
+type randomer interface {
+	Intn(n int) int
+	Float64() float64
+}
 
-func randIntn(n int) int {
-	return int(math.Floor(random() * float64(n)))
+func newRandNow() randomer {
+	return newRandTime(time.Now())
+}
+
+func newRandTime(t time.Time) randomer {
+	return newRandSeed(t.UTC().UnixNano())
+}
+
+func newRandSeed(seed int64) randomer {
+	return rand.New(rand.NewSource(seed))
 }

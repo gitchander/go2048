@@ -21,18 +21,20 @@ type GameManager struct {
 	grid           *grid
 	mapTraversals  map[Direction]*traversals
 	storageManager *StorageManager
-	actuator       *Actuator
+	handler        Handler
 	startTiles     int
+	randomer       randomer
 }
 
-func NewGameManager(storage Storage, ar AnimationRequester) *GameManager {
+func NewGameManager(storage Storage, handler Handler) *GameManager {
 
 	gm := &GameManager{
 		//grid:        newGrid(defaultSize),
 		//mapTraversals:  buildMapTraversals(defaultSize),
 		storageManager: NewStorageManager(storage),
-		actuator:       &Actuator{ar},
+		handler:        handler,
 		startTiles:     2,
+		randomer:       newRandNow(),
 	}
 
 	gm.setup()
@@ -76,7 +78,7 @@ func (gm *GameManager) setup() {
 		gm.addStartTiles()
 	}
 
-	gm.actuator.ar.Init(size)
+	gm.handler.Init(size)
 
 	// Update the actuator
 	gm.actuate()
@@ -85,22 +87,21 @@ func (gm *GameManager) setup() {
 // Set up the initial tiles to start the game with
 func (gm *GameManager) addStartTiles() {
 	for i := 0; i < gm.startTiles; i++ {
-		gm.grid.addRandomTile()
+		gm.grid.addRandomTile(gm.randomer)
 	}
 }
 
 // Restart the game
 func (gm *GameManager) Restart() {
 	gm.storageManager.clearGameState()
+	gm.handler.Message(MK_CLEAR)
 	gm.setup()
-	//gm.actuator.continueGame() // Clear the game won/lost message
-
 }
 
 // Keep playing after winning (allows going over 2048)
 func (gm *GameManager) KeepPlaying() {
 	gm.keepPlaying = true
-	gm.actuator.continueGame() // Clear the game won/lost message
+	gm.handler.Message(MK_CLEAR)
 }
 
 // Sends the updated grid to the actuator
@@ -136,14 +137,32 @@ func (gm *GameManager) actuate() {
 
 	terminated := gm.isGameTerminated()
 
-	gm.actuator.actuate(
-		tiles,
-		gm.score,
-		gm.storageManager.getBestScore(),
-		gm.over,
-		gm.won,
-		terminated,
-	)
+	//-----------------------------------
+	//	gm.actuator.actuate(
+	//		tiles,
+	//		gm.score,
+	//		gm.storageManager.getBestScore(),
+	//		gm.over,
+	//		gm.won,
+	//		terminated,
+	//	)
+	//-----------------------------------
+	// gm.handler
+
+	bestScore := gm.storageManager.getBestScore()
+
+	gm.handler.AnimationRequest(tiles)
+
+	gm.handler.UpdateScore(gm.score)
+	gm.handler.UpdateBestScore(bestScore)
+
+	if terminated {
+		if gm.over {
+			gm.handler.Message(MK_YOU_LOSE) // You lose
+		} else if gm.won {
+			gm.handler.Message(MK_YOU_WIN) // You win!
+		}
+	}
 }
 
 // Return true if the game is lost, or has won and the user hasn't kept playing
@@ -206,7 +225,7 @@ func (gm *GameManager) Move(d Direction) {
 	)
 
 	if moved {
-		gm.grid.addRandomTile()
+		gm.grid.addRandomTile(gm.randomer)
 		if !gm.grid.movesAvailable() {
 			gm.over = true // Game over!
 		}

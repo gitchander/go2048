@@ -8,9 +8,9 @@ import (
 type MessageKind int
 
 const (
-	MK_CLEAR    MessageKind = iota
-	MK_YOU_LOSE             // You lose
-	MK_YOU_WIN              // You win!
+	MK_CLEAR    MessageKind = iota // Clear the game won/lost message
+	MK_YOU_LOSE                    // You lose
+	MK_YOU_WIN                     // You win!
 )
 
 var name_MessageKind = map[MessageKind]string{
@@ -26,7 +26,7 @@ func (mk MessageKind) String() string {
 	return strconv.Itoa(int(mk))
 }
 
-type AnimationRequester interface {
+type Handler interface {
 	Init(size image.Point)
 	AnimationRequest(tiles []*Tile)
 	UpdateScore(score int)
@@ -34,42 +34,10 @@ type AnimationRequester interface {
 	Message(MessageKind)
 }
 
-type DummyAnimationRequester struct{}
+type DummyHandler struct{}
 
-func (DummyAnimationRequester) Init(size image.Point)          {}
-func (DummyAnimationRequester) AnimationRequest(tiles []*Tile) {}
-func (DummyAnimationRequester) UpdateScore(score int)          {}
-func (DummyAnimationRequester) UpdateBestScore(bestScore int)  {}
-func (DummyAnimationRequester) Message(MessageKind)            {}
-
-type Actuator struct {
-	ar AnimationRequester
-}
-
-// Clear the game won/lost message
-func (a *Actuator) continueGame() {
-	a.ar.Message(MK_CLEAR)
-}
-
-func (a *Actuator) actuate(tiles []*Tile, score int, bestScore int, over bool, won bool, terminated bool) {
-
-	//	var tiles []Tile
-	//	g.forEach(
-	//		func(t *Tile) {
-	//			tiles = append(tiles, *t)
-	//		},
-	//	)
-
-	a.ar.AnimationRequest(tiles)
-
-	a.ar.UpdateScore(score)
-	a.ar.UpdateBestScore(bestScore)
-
-	if terminated {
-		if over {
-			a.ar.Message(MK_YOU_LOSE) // You lose
-		} else if won {
-			a.ar.Message(MK_YOU_WIN) // You win!
-		}
-	}
-}
+func (DummyHandler) Init(size image.Point)          {}
+func (DummyHandler) AnimationRequest(tiles []*Tile) {}
+func (DummyHandler) UpdateScore(score int)          {}
+func (DummyHandler) UpdateBestScore(bestScore int)  {}
+func (DummyHandler) Message(MessageKind)            {}

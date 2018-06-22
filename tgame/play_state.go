@@ -55,7 +55,9 @@ func (ps *PlayState) MoveDown() {
 }
 
 func (ps *PlayState) Restart() {
-	ps.inputManager.Restart()
+	if ps.drawer.animation.done() {
+		ps.inputManager.Restart()
+	}
 }
 
 func (ps *PlayState) MoveUp() {
@@ -65,11 +67,15 @@ func (ps *PlayState) MoveUp() {
 }
 
 func (ps *PlayState) UndoMove() {
-	ps.inputManager.UndoMove()
+	if ps.drawer.animation.done() {
+		ps.inputManager.UndoMove()
+	}
 }
 
 func (ps *PlayState) KeepPlaying() {
-	ps.inputManager.KeepPlaying()
+	if ps.drawer.animation.done() {
+		ps.inputManager.KeepPlaying()
+	}
 }
 
 func (ps *PlayState) EventKey(Key termbox.Key) {

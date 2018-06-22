@@ -47,7 +47,7 @@ func (fl *FileLogger) Write(data []byte) (n int, err error) {
 }
 
 func usageFileLogger() {
-	logWriter, err := NewFileLogger("out.log")
+	logWriter, err := NewFileLogger("test.log")
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -55,4 +55,16 @@ func usageFileLogger() {
 	log.SetOutput(logWriter)
 
 	// do something
+}
+
+func logToFile() {
+	filename := "test.log"
+	file, err := os.OpenFile(filename, os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0644)
+	checkErr(err)
+	defer file.Close()
+	log.SetOutput(file)
+
+	log.Println("start logging")
+	Main()
+	log.Println("stop logging")
 }

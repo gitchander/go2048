@@ -66,30 +66,31 @@ func NewDrawer(cellSize image.Point) *Drawer {
 	//	}
 }
 
-func (d *Drawer) Init(size image.Point) {
+func (d *Drawer) Init(gridSize image.Point) {
 
-	cellSize := d.cellSize
-
-	d.gridSize = size
+	d.gridSize = gridSize
 	//cellSize: cellSize,
 	//		animation: animationInfo{
 	//			duration: 0.1,
 	//		},
 
 	d.gd = &gridDrawer{
-		gridSize: size,
-		cellSize: cellSize,
+		gridSize: gridSize,
+		cellSize: d.cellSize,
 		fg:       termbox.ColorCyan | termbox.AttrBold,
 		bg:       termbox.ColorCyan,
 		table:    game.BorderTable(5),
 	}
 	d.td = &tilesDrawer{
-		gridSize:   size,
-		cellSize:   cellSize,
+		gridSize:   gridSize,
+		cellSize:   d.cellSize,
 		fg:         termbox.ColorYellow | termbox.AttrBold,
 		bg:         termbox.ColorBlue,
 		valueRunes: make(map[int][]rune),
 	}
+
+	d.td.SetScreenSize(d.screenSize)
+	d.gd.SetScreenSize(d.screenSize)
 }
 
 func (a *Drawer) AnimationRequest(tiles []*game.Tile) {

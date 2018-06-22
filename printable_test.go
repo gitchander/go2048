@@ -2,6 +2,7 @@ package go2048
 
 import (
 	"bytes"
+	"fmt"
 	"image"
 	"testing"
 
@@ -33,9 +34,15 @@ func TestPrintable(t *testing.T) {
 
 	cc := dummyCellContenter(image.Point{X: 3, Y: 3})
 
-	data := encodePrintable(cc, "\t", tableRuneTest)
+	var cellSize = image.Point{X: 7, Y: 3}
+
+	pe := newPrintEncoder(cellSize, "\t", cc, tableRuneTest)
+	data := pe.Encode()
 
 	if !bytes.Equal(data, result) {
+		fmt.Println(string(data))
+		fmt.Println(string(result))
+
 		t.Log(hex.Dump(data))
 		t.Log(hex.Dump(result))
 

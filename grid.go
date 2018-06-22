@@ -1,6 +1,8 @@
 package go2048
 
-import "image"
+import (
+	"image"
+)
 
 func DefaultSize() image.Point {
 	return image.Point{4, 4}
@@ -130,7 +132,7 @@ func (g *grid) withinBounds(cell image.Point) bool {
 }
 
 // Adds a tile in a random position
-func (g *grid) addRandomTile() {
+func (g *grid) addRandomTile(r randomer) {
 
 	cells := g.availableCells()
 	if (cells == nil) || (len(cells) == 0) {
@@ -138,13 +140,13 @@ func (g *grid) addRandomTile() {
 	}
 
 	var value int
-	if random() < 0.9 {
+	if r.Float64() < 0.9 {
 		value = 2
 	} else {
 		value = 4
 	}
 
-	cell := cells[randIntn(len(cells))]
+	cell := cells[r.Intn(len(cells))]
 	g.insertTile(newTile(cell, value))
 }
 

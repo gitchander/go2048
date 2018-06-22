@@ -4,50 +4,6 @@ import (
 	"encoding/json"
 )
 
-//var ErrKeyRequired = errors.New("key required")
-
-//type Storage interface {
-//	Put(key string, value []byte) error
-//	Get(key string) ([]byte, error)
-//	Remove(key string) error
-//}
-
-//var FakeStorage Storage = newFakeStorage()
-
-//type fakeStorage struct {
-//	data map[string][]byte
-//}
-
-//func newFakeStorage() *fakeStorage {
-//	return &fakeStorage{
-//		data: make(map[string][]byte),
-//	}
-//}
-
-//func (fs *fakeStorage) Put(key string, value []byte) error {
-//	if len(key) == 0 {
-//		return ErrKeyRequired
-//	}
-//	fs.data[key] = value
-//	return nil
-//}
-
-//func (fs *fakeStorage) Get(key string) ([]byte, error) {
-//	if len(key) == 0 {
-//		return nil, ErrKeyRequired
-//	}
-//	v, ok := fs.data[key]
-//	if !ok {
-//		return nil, ErrKeyRequired
-//	}
-//	return v, nil
-//}
-
-//func (fs *fakeStorage) Remove(key string) error {
-//	delete(fs.data, key)
-//	return nil
-//}
-
 type StorageManager struct {
 	storage Storage
 }
