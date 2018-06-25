@@ -15,7 +15,7 @@ func Main() {
 
 	var fs = pot.NewFakeStorage()
 
-	gm := pot.NewGameManager(fs, pot.DummyAnimationRequester{})
+	gm := pot.NewGameManager(fs, pot.DummyHandler{})
 
 	printTable(gm)
 
