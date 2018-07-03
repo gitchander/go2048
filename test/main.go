@@ -1,34 +1,36 @@
 package main
 
 import (
+	"bufio"
 	"fmt"
 	"log"
+	"os"
+	"strings"
 
 	pot "github.com/gitchander/go2048"
 )
 
 func main() {
-	Main()
-}
-
-func Main() {
-
 	var fs = pot.NewFakeStorage()
 
 	gm := pot.NewGameManager(fs, pot.DummyHandler{})
+	printGrid(gm)
 
-	printTable(gm)
+	r := bufio.NewReader(os.Stdin)
 
-	var line string
-
-start:
 	for {
-		_, err := fmt.Scanf("%s", &line)
+		fmt.Print("> ")
+
+		line, err := r.ReadString('\n')
 		if err != nil {
 			log.Fatal(err)
 		}
 
+		line = strings.TrimSuffix(line, "\n")
+
 		switch line {
+		case "":
+			// do nothing
 		case "a", "A":
 			gm.Move(pot.Left)
 		case "d", "D":
@@ -40,13 +42,15 @@ start:
 		case "q", "Q":
 			fallthrough
 		case "e", "E":
-			break start
+			os.Exit(0)
+		default:
+			fmt.Println("bad command:", line)
 		}
 
-		printTable(gm)
+		printGrid(gm)
 	}
 }
 
-func printTable(gm *pot.GameManager) {
-	fmt.Println(string(gm.DataTable()))
+func printGrid(gm *pot.GameManager) {
+	fmt.Print(string(gm.PrintableGrid()))
 }

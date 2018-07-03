@@ -141,10 +141,10 @@ func (pe *printEncoder) writeLineVal(buf *bytes.Buffer, sr []rune, y int) {
 		if val, ok := pe.cc.CellValue(image.Point{x, y}); ok {
 			if cellWidth >= 4+2 {
 				buf.WriteRune(sr[1])
-				buf.WriteString(ItoaN(val, cellWidth-2, byte(sr[1])))
+				buf.WriteString(itoaN(val, cellWidth-2, byte(sr[1])))
 				buf.WriteRune(sr[1])
 			} else {
-				buf.WriteString(ItoaN(val, cellWidth, byte(sr[1])))
+				buf.WriteString(itoaN(val, cellWidth, byte(sr[1])))
 			}
 		} else {
 			for i := 0; i < cellWidth; i++ {
@@ -169,7 +169,7 @@ func repeatRune(r rune, n int) string {
 	return string(rs)
 }
 
-func ItoaN(x, n int, fillByte byte) string {
+func itoaN(x, n int, fillByte byte) string {
 
 	data := make([]byte, n)
 	i := n

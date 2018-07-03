@@ -266,6 +266,6 @@ func (gm *GameManager) Draw() {
 	gm.actuate()
 }
 
-func (gm *GameManager) DataTable() []byte {
+func (gm *GameManager) PrintableGrid() []byte {
 	return encodePrintableTest(gm.grid)
 }
