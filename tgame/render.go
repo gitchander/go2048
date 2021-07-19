@@ -77,14 +77,16 @@ func (d *Drawer) Init(gridSize image.Point) {
 	d.gd = &gridDrawer{
 		gridSize: gridSize,
 		cellSize: d.cellSize,
-		fg:       termbox.ColorCyan | termbox.AttrBold,
-		bg:       termbox.ColorCyan,
-		table:    game.BorderTable(5),
+		//fg:       termbox.ColorCyan | termbox.AttrBold,
+		fg:    termbox.ColorLightCyan | termbox.AttrBold,
+		bg:    termbox.ColorCyan,
+		table: game.BorderTable(5),
 	}
 	d.td = &tilesDrawer{
-		gridSize:   gridSize,
-		cellSize:   d.cellSize,
-		fg:         termbox.ColorYellow | termbox.AttrBold,
+		gridSize: gridSize,
+		cellSize: d.cellSize,
+		//fg:       termbox.ColorYellow | termbox.AttrBold,
+		fg:         termbox.ColorLightYellow | termbox.AttrBold,
 		bg:         termbox.ColorBlue,
 		valueRunes: make(map[int][]rune),
 	}
