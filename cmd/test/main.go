@@ -11,9 +11,8 @@ import (
 )
 
 func main() {
-	var fs = pot.NewFakeStorage()
-
-	gm := pot.NewGameManager(fs, pot.DummyHandler{})
+	ms := pot.NewMapStorage()
+	gm := pot.NewGameManager(ms, pot.DummyHandler{})
 	printGrid(gm)
 
 	r := bufio.NewReader(os.Stdin)

@@ -2,6 +2,7 @@ package go2048
 
 import (
 	"image"
+	"math/rand"
 )
 
 func DefaultSize() image.Point {
@@ -52,51 +53,56 @@ func (g *grid) moveTile(t *Tile, cell image.Point) {
 	t.updatePosition(cell)
 }
 
-func (g *grid) availableCells() (cells []image.Point) {
+func (g *grid) rangeCells(f func(cell image.Point, t *Tile) bool) {
 	for x, st := range g.sst {
 		for y, t := range st {
-			if t == nil {
-				cells = append(cells, image.Point{x, y})
+			cell := image.Point{x, y}
+			if not(f(cell, t)) {
+				return
 			}
 		}
 	}
-	return
 }
 
-func (g *grid) forEach(fn func(*Tile)) {
+func (g *grid) rangeTiles(f func(*Tile) bool) {
 	for _, st := range g.sst {
 		for _, t := range st {
 			if t != nil {
-				fn(t)
+				if not(f(t)) {
+					return
+				}
 			}
 		}
 	}
 }
 
-//func (g *grid) forEachCell(fn func(image.Point, *Tile)) {
-//	for x, st := range g.sst {
-//		for y, t := range st {
-//			var cell = image.Point{x, y}
-//			fn(cell, t)
-//		}
-//	}
-//}
-
 // Check if there are any cells available
-func (g *grid) cellsAvailable() bool {
-	for _, st := range g.sst {
-		for _, t := range st {
+func (g *grid) hasAvailableCells() (ok bool) {
+	g.rangeCells(
+		func(cell image.Point, t *Tile) bool {
 			if t == nil {
-				return true
+				ok = true
+				return false
 			}
-		}
-	}
-	return false
+			return true
+		})
+	return
+}
+
+func (g *grid) availableCells() (cells []image.Point) {
+	g.rangeCells(
+		func(cell image.Point, t *Tile) bool {
+			if t == nil {
+				cells = append(cells, cell)
+			}
+			return true
+		})
+	return
 }
 
 // Check if the specified cell is taken
 func (g *grid) cellAvailable(cell image.Point) bool {
-	return !g.cellOccupied(cell)
+	return not(g.cellOccupied(cell))
 }
 
 func (g *grid) cellOccupied(cell image.Point) bool {
@@ -120,11 +126,11 @@ func (g *grid) CellValue(cell image.Point) (val int, ok bool) {
 
 func (g *grid) withinBounds(cell image.Point) bool {
 
-	if (cell.X < 0) || (cell.X >= g.size.X) {
+	if (cell.X < 0) || (g.size.X <= cell.X) {
 		return false
 	}
 
-	if (cell.Y < 0) || (cell.Y >= g.size.Y) {
+	if (cell.Y < 0) || (g.size.Y <= cell.Y) {
 		return false
 	}
 
@@ -132,7 +138,7 @@ func (g *grid) withinBounds(cell image.Point) bool {
 }
 
 // Adds a tile in a random position
-func (g *grid) addRandomTile(r randomer) {
+func (g *grid) addRandomTile(r *rand.Rand) {
 
 	cells := g.availableCells()
 	if (cells == nil) || (len(cells) == 0) {
@@ -151,35 +157,36 @@ func (g *grid) addRandomTile(r randomer) {
 }
 
 // Save the current tile positions and remove merger information
-func (g *grid) prepareTiles() {
-	g.forEach(
-		func(t *Tile) {
-			t.resetPrevious()
+func (g *grid) resetTiles() {
+	g.rangeTiles(
+		func(t *Tile) bool {
+			t.reset()
+			return true
 		},
 	)
 }
 
 // Check for available matches between tiles (more expensive check)
-func (g *grid) tileMatchesAvailable() bool {
-	for x, st := range g.sst {
-		for y, t := range st {
+func (g *grid) tileMatchesAvailable() (ok bool) {
+	g.rangeCells(
+		func(cell image.Point, t *Tile) bool {
 			if t != nil {
-				var cell = image.Point{x, y}
 				for _, d := range directions {
 					vector := d.getVector()
 					other := g.cellContent(cell.Add(vector))
 					if (other != nil) && (other.Value == t.Value) {
-						return true // These two tiles can be merged
+						ok = true // These two tiles can be merged
+						return false
 					}
 				}
 			}
-		}
-	}
-	return false
+			return true
+		})
+	return
 }
 
 func (g *grid) movesAvailable() bool {
-	return g.cellsAvailable() || g.tileMatchesAvailable()
+	return g.hasAvailableCells() || g.tileMatchesAvailable()
 }
 
 type positions struct {
@@ -195,7 +202,7 @@ func (g *grid) findFarthestPosition(cell, vector image.Point) positions {
 		previous = cell
 		cell = previous.Add(vector)
 
-		if !(g.withinBounds(cell) && g.cellAvailable(cell)) {
+		if not(g.withinBounds(cell) && g.cellAvailable(cell)) {
 			break
 		}
 	}

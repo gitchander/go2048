@@ -56,15 +56,3 @@ func usageFileLogger() {
 
 	// do something
 }
-
-func logToFile() {
-	filename := "test.log"
-	file, err := os.OpenFile(filename, os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0644)
-	checkErr(err)
-	defer file.Close()
-	log.SetOutput(file)
-
-	log.Println("start logging")
-	Main()
-	log.Println("stop logging")
-}

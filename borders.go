@@ -28,7 +28,7 @@ package go2048
 
 type borderRunes [][]rune
 
-var b_table = []borderRunes{
+var borderTables = []borderRunes{
 	{
 		[]rune("+-++"),
 		[]rune("| ||"),
@@ -74,5 +74,5 @@ var b_table = []borderRunes{
 }
 
 func BorderTable(i int) [][]rune {
-	return ([][]rune)(b_table[mod(i, len(b_table))])
+	return ([][]rune)(borderTables[mod(i, len(borderTables))])
 }

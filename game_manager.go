@@ -2,6 +2,9 @@ package go2048
 
 import (
 	"image"
+	"math/rand"
+
+	"github.com/gitchander/go2048/utils"
 )
 
 type gameState struct {
@@ -23,7 +26,7 @@ type GameManager struct {
 	storageManager *StorageManager
 	handler        Handler
 	startTiles     int
-	randomer       randomer
+	randSource     *rand.Rand
 }
 
 func NewGameManager(storage Storage, handler Handler) *GameManager {
@@ -34,7 +37,7 @@ func NewGameManager(storage Storage, handler Handler) *GameManager {
 		storageManager: NewStorageManager(storage),
 		handler:        handler,
 		startTiles:     2,
-		randomer:       newRandNow(),
+		randSource:     utils.NewRandNow(),
 	}
 
 	gm.setup()
@@ -87,7 +90,7 @@ func (gm *GameManager) setup() {
 // Set up the initial tiles to start the game with
 func (gm *GameManager) addStartTiles() {
 	for i := 0; i < gm.startTiles; i++ {
-		gm.grid.addRandomTile(gm.randomer)
+		gm.grid.addRandomTile(gm.randSource)
 	}
 }
 
@@ -112,9 +115,10 @@ func (gm *GameManager) actuate() {
 	}
 
 	var tiles []*Tile
-	gm.grid.forEach(
-		func(t *Tile) {
+	gm.grid.rangeTiles(
+		func(t *Tile) bool {
 			tiles = append(tiles, t)
+			return true
 		},
 	)
 
@@ -167,7 +171,7 @@ func (gm *GameManager) actuate() {
 
 // Return true if the game is lost, or has won and the user hasn't kept playing
 func (gm *GameManager) isGameTerminated() bool {
-	return gm.over || (gm.won && !gm.keepPlaying)
+	return gm.over || (gm.won && not(gm.keepPlaying))
 }
 
 // Move tiles on the grid in the specified direction
@@ -183,50 +187,51 @@ func (gm *GameManager) Move(d Direction) {
 	var moved bool
 
 	// Save the current tile positions and remove merger information
-	gm.grid.prepareTiles()
+	gm.grid.resetTiles()
+
+	rf := func(cell image.Point) bool {
+		current := gm.grid.cellContent(cell)
+		if current != nil {
+			var positions = gm.grid.findFarthestPosition(cell, vector)
+			var next = gm.grid.cellContent(positions.next)
+
+			// Only one merger per row traversal?
+			if (next != nil) && (next.Value == current.Value) && (next.MergedFrom == nil) {
+
+				var merged = mergeTiles(positions.next, current, next)
+
+				gm.grid.insertTile(merged)
+				gm.grid.removeTile(current)
+
+				// Converge the two tiles' positions
+				current.updatePosition(positions.next)
+
+				// Update the score
+				gm.score += merged.Value
+
+				// The mighty 2048 tile
+				if merged.Value == 2048 {
+					gm.won = true
+				}
+
+			} else {
+				gm.grid.moveTile(current, positions.farthest)
+			}
+
+			if not(cell.Eq(current.Position)) {
+				moved = true // The tile moved from its original cell!
+			}
+		}
+		return true
+	}
 
 	// Traverse the grid in the right direction and move tiles
 	t := gm.mapTraversals[d]
-	t.Range(
-		func(cell image.Point) {
-			current := gm.grid.cellContent(cell)
-			if current != nil {
-				var positions = gm.grid.findFarthestPosition(cell, vector)
-				var next = gm.grid.cellContent(positions.next)
-
-				// Only one merger per row traversal?
-				if (next != nil) && (next.Value == current.Value) && (next.MergedFrom == nil) {
-
-					var merged = mergeTiles(positions.next, current, next)
-
-					gm.grid.insertTile(merged)
-					gm.grid.removeTile(current)
-
-					// Converge the two tiles' positions
-					current.updatePosition(positions.next)
-
-					// Update the score
-					gm.score += merged.Value
-
-					// The mighty 2048 tile
-					if merged.Value == 2048 {
-						gm.won = true
-					}
-
-				} else {
-					gm.grid.moveTile(current, positions.farthest)
-				}
-
-				if !(cell.Eq(current.Position)) {
-					moved = true // The tile moved from its original cell!
-				}
-			}
-		},
-	)
+	t.Range(rf)
 
 	if moved {
-		gm.grid.addRandomTile(gm.randomer)
-		if !gm.grid.movesAvailable() {
+		gm.grid.addRandomTile(gm.randSource)
+		if not(gm.grid.movesAvailable()) {
 			gm.over = true // Game over!
 		}
 		gm.actuate()
@@ -238,8 +243,8 @@ func (gm *GameManager) UndoMove() {
 	var okUndo bool
 
 	newGrid := newGrid(gm.grid.Size())
-	gm.grid.forEach(
-		func(t *Tile) {
+	gm.grid.rangeTiles(
+		func(t *Tile) bool {
 			if t.PreviousPosition != nil {
 				okUndo = true
 				newGrid.insertTile(newTile(*t.PreviousPosition, t.Value))
@@ -253,6 +258,7 @@ func (gm *GameManager) UndoMove() {
 					newGrid.insertTile(newTile(prevPos, merged.Value))
 				}
 			}
+			return true
 		},
 	)
 

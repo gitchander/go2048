@@ -1,6 +1,10 @@
 package go2048
 
-import "image"
+import (
+	"image"
+
+	"github.com/gitchander/go2048/utils"
+)
 
 // traverse
 
@@ -20,19 +24,21 @@ func newTraversals(size image.Point, d Direction) *traversals {
 
 	// Always traverse from the farthest cell in the chosen direction
 	if vector.X == 1 {
-		reverseInts(t.xs)
+		utils.Reverse(utils.IntSlice(t.xs))
 	}
 	if vector.Y == 1 {
-		reverseInts(t.ys)
+		utils.Reverse(utils.IntSlice(t.ys))
 	}
 
 	return t
 }
 
-func (t *traversals) Range(f func(image.Point)) {
+func (t *traversals) Range(f func(image.Point) bool) {
 	for _, x := range t.xs {
 		for _, y := range t.ys {
-			f(image.Pt(x, y))
+			if not(f(image.Pt(x, y))) {
+				return
+			}
 		}
 	}
 }

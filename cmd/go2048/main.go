@@ -1,6 +1,7 @@
 package main
 
 import (
+	"flag"
 	"log"
 	"time"
 
@@ -8,13 +9,13 @@ import (
 )
 
 func main() {
-	Main()
-}
 
-func Main() {
+	var storageName string
+	flag.StringVar(&storageName, "storage", "game.db", "database storage filename")
+	flag.Parse()
 
 	err := termbox.Init()
-	checkErr(err)
+	checkError(err)
 	defer termbox.Close()
 
 	termbox.SetInputMode(termbox.InputEsc)
@@ -26,10 +27,8 @@ func Main() {
 		}
 	}()
 
-	storage, err := NewBoltStorage("game.db")
-	if err != nil {
-		log.Fatal(err)
-	}
+	storage, err := NewBoltStorage(storageName)
+	checkError(err)
 	defer storage.Close()
 
 	sm := NewStateManager(storage)
@@ -38,7 +37,7 @@ func Main() {
 	sm.EventResize(width, height)
 
 	err = sm.AppendState("play", NewPlayState(sm))
-	checkErr(err)
+	checkError(err)
 
 	sm.AppendState("menu",
 		NewMenuState(sm,
@@ -80,7 +79,7 @@ func Main() {
 	}
 }
 
-func checkErr(err error) {
+func checkError(err error) {
 	if err != nil {
 		log.Fatal(err)
 	}

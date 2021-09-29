@@ -2,39 +2,41 @@ package go2048
 
 import "errors"
 
+var ErrNoValueByKey = errors.New("no value by key in storage")
+
 type Storage interface {
-	Put(key string, val []byte) error
-	Get(key string) (val []byte, err error)
+	Put(key string, value []byte) error
+	Get(key string) (value []byte, err error)
 	Remove(key string) error
 }
 
-type FakeStorage map[string][]byte
+type MapStorage map[string][]byte
 
-var _ Storage = &FakeStorage{}
+var _ Storage = &MapStorage{}
 
-func NewFakeStorage() *FakeStorage {
-	fs := FakeStorage(make(map[string][]byte))
-	return &fs
+func NewMapStorage() *MapStorage {
+	ms := MapStorage(make(map[string][]byte))
+	return &ms
 }
 
-func (fs *FakeStorage) Put(key string, val []byte) error {
-	(*fs)[key] = val
+func (ms *MapStorage) Put(key string, val []byte) error {
+	(*ms)[key] = val
 	return nil
 }
 
-func (fs *FakeStorage) Get(key string) (val []byte, err error) {
-	val, ok := (*fs)[key]
+func (ms *MapStorage) Get(key string) (val []byte, err error) {
+	val, ok := (*ms)[key]
 	if !ok {
-		return nil, errors.New("has not key in storage")
+		return nil, ErrNoValueByKey
 	}
 	return val, nil
 }
 
-func (fs *FakeStorage) Remove(key string) error {
-	_, ok := (*fs)[key]
+func (ms *MapStorage) Remove(key string) error {
+	_, ok := (*ms)[key]
 	if !ok {
-		return errors.New("has not key in storage")
+		return ErrNoValueByKey
 	}
-	delete((*fs), key)
+	delete((*ms), key)
 	return nil
 }

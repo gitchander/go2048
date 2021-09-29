@@ -17,7 +17,7 @@ func newTile(position image.Point, value int) *Tile {
 	}
 }
 
-func (t *Tile) resetPrevious() {
+func (t *Tile) reset() {
 	t.PreviousPosition = nil
 	t.MergedFrom = nil
 }
@@ -29,9 +29,6 @@ func (t *Tile) updatePosition(position image.Point) {
 }
 
 func mergeTiles(pos image.Point, ts ...*Tile) *Tile {
-	if len(ts) != 2 {
-		panic("merged not two tiles")
-	}
 	var sum int
 	for _, t := range ts {
 		sum += t.Value

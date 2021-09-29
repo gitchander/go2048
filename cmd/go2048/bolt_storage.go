@@ -51,30 +51,30 @@ func (st *BoltStorage) Close() error {
 	return err
 }
 
-func (st *BoltStorage) Put(key string, val []byte) error {
+func (st *BoltStorage) Put(key string, value []byte) error {
 	return st.db.Update(
 		func(tx *bolt.Tx) error {
 			b := tx.Bucket(st.bucketName)
 			if b == nil {
 				return fmt.Errorf("no bucket %s in db", st.bucketName)
 			}
-			return b.Put([]byte(key), val)
+			return b.Put([]byte(key), value)
 		},
 	)
 }
 
-func (st *BoltStorage) Get(key string) (val []byte, err error) {
+func (st *BoltStorage) Get(key string) (value []byte, err error) {
 	err = st.db.View(
 		func(tx *bolt.Tx) error {
 			b := tx.Bucket(st.bucketName)
 			if b == nil {
 				return fmt.Errorf("no bucket %s in db", st.bucketName)
 			}
-			val = b.Get([]byte(key))
+			value = b.Get([]byte(key))
 			return nil
 		},
 	)
-	return val, err
+	return value, err
 }
 
 func (st *BoltStorage) Remove(key string) error {

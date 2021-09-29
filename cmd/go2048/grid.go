@@ -93,41 +93,39 @@ func (gd *gridDrawer) drawLineSpaces(x, y int, ri int, iy int) {
 	termbox.SetCell(x, y, rs[3], fg, bg)
 }
 
-/*
-func (ld *lineDrawer) drawLineValues(x, y int, ri int, iy int) {
+// func (ld *lineDrawer) drawLineValues(x, y int, ri int, iy int) {
 
-	fg, bg := ld.fg, ld.bg
+// 	fg, bg := ld.fg, ld.bg
 
-	dx, _ := ld.m.Size()
+// 	dx, _ := ld.m.Size()
 
-	rs := ld.table[ri]
+// 	rs := ld.table[ri]
 
-	termbox.SetCell(x, y, rs[0], fg, bg)
-	x++
-	for ix := 0; ix < dx; ix++ {
-		if ix > 0 {
-			termbox.SetCell(x, y, rs[2], fg, bg)
-			x++
-		}
-		if n, _ := ld.m.Get(ix, iy); n != nil {
+// 	termbox.SetCell(x, y, rs[0], fg, bg)
+// 	x++
+// 	for ix := 0; ix < dx; ix++ {
+// 		if ix > 0 {
+// 			termbox.SetCell(x, y, rs[2], fg, bg)
+// 			x++
+// 		}
+// 		if n, _ := ld.m.Get(ix, iy); n != nil {
 
-			vrs, ok := ld.valueRunes[n.val]
-			if !ok {
-				vrs = valueToRunes(n.val, ld.cellSizeX)
-				ld.valueRunes[n.val] = vrs
-			}
+// 			vrs, ok := ld.valueRunes[n.val]
+// 			if !ok {
+// 				vrs = valueToRunes(n.val, ld.cellSizeX)
+// 				ld.valueRunes[n.val] = vrs
+// 			}
 
-			for _, r := range vrs {
-				termbox.SetCell(x, y, r, n.fg, n.bg)
-				x++
-			}
-		} else {
-			for i := 0; i < ld.cellSizeX; i++ {
-				termbox.SetCell(x, y, ' ', fg, bg)
-				x++
-			}
-		}
-	}
-	termbox.SetCell(x, y, rs[3], fg, bg)
-}
-*/
+// 			for _, r := range vrs {
+// 				termbox.SetCell(x, y, r, n.fg, n.bg)
+// 				x++
+// 			}
+// 		} else {
+// 			for i := 0; i < ld.cellSizeX; i++ {
+// 				termbox.SetCell(x, y, ' ', fg, bg)
+// 				x++
+// 			}
+// 		}
+// 	}
+// 	termbox.SetCell(x, y, rs[3], fg, bg)
+// }

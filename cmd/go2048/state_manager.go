@@ -21,7 +21,7 @@ func NewStateManager(storage game.Storage) *StateManager {
 	return &StateManager{
 		storage: storage,
 		states:  make(map[string]State),
-		active:  fakeState{},
+		active:  dummyState{},
 	}
 }
 
