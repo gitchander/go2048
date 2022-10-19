@@ -1,9 +1,14 @@
 module github.com/gitchander/go2048
 
-go 1.16
+go 1.19
 
 require (
 	github.com/boltdb/bolt v1.3.1
 	github.com/nsf/termbox-go v1.1.1
-	golang.org/x/sys v0.0.0-20210630005230-0f9fa26af87c // indirect
+)
+
+require (
+	github.com/mattn/go-runewidth v0.0.14 // indirect
+	github.com/rivo/uniseg v0.4.2 // indirect
+	golang.org/x/sys v0.1.0 // indirect
 )
