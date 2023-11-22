@@ -1,4 +1,4 @@
-package go2048
+package core
 
 // serialInts returns []int{ 0, 1, 2, 3, ... n-1 }
 func serialInts(n int) []int {

@@ -1,7 +1,6 @@
-package go2048
+package core
 
 import (
-	"image"
 	"math/rand"
 
 	"github.com/gitchander/go2048/utils"
@@ -12,7 +11,7 @@ type gameState struct {
 	Over        bool
 	Won         bool
 	KeepPlaying bool
-	Size        image.Point
+	Size        Point
 	Tiles       []*Tile
 }
 
@@ -189,7 +188,7 @@ func (gm *GameManager) Move(d Direction) {
 	// Save the current tile positions and remove merger information
 	gm.grid.resetTiles()
 
-	rf := func(cell image.Point) bool {
+	rf := func(cell Point) bool {
 		current := gm.grid.cellContent(cell)
 		if current != nil {
 			var positions = gm.grid.findFarthestPosition(cell, vector)
@@ -240,16 +239,16 @@ func (gm *GameManager) Move(d Direction) {
 
 func (gm *GameManager) UndoMove() {
 
-	var okUndo bool
+	var undoOK bool
 
 	newGrid := newGrid(gm.grid.Size())
 	gm.grid.rangeTiles(
 		func(t *Tile) bool {
 			if t.PreviousPosition != nil {
-				okUndo = true
+				undoOK = true
 				newGrid.insertTile(newTile(*t.PreviousPosition, t.Value))
 			} else if t.MergedFrom != nil {
-				okUndo = true
+				undoOK = true
 				for _, merged := range t.MergedFrom {
 					prevPos := merged.Position
 					if merged.PreviousPosition != nil {
@@ -262,7 +261,7 @@ func (gm *GameManager) UndoMove() {
 		},
 	)
 
-	if okUndo {
+	if undoOK {
 		gm.grid = newGrid
 		gm.actuate()
 	}

@@ -5,13 +5,13 @@ import (
 
 	"github.com/nsf/termbox-go"
 
-	game "github.com/gitchander/go2048"
+	"github.com/gitchander/go2048/core"
 )
 
 type PlayState struct {
 	sm           *StateManager
 	drawer       *Drawer
-	inputManager game.InputManager
+	inputManager core.InputManager
 }
 
 var _ State = &PlayState{}
@@ -25,9 +25,9 @@ func NewPlayState(sm *StateManager) *PlayState {
 	//cellSize := image.Point{4, 1}
 	drawer := NewDrawer(cellSize)
 
-	gm := game.NewGameManager(sm.storage, drawer)
+	gm := core.NewGameManager(sm.storage, drawer)
 
-	var inputManager game.InputManager = gm
+	var inputManager core.InputManager = gm
 
 	return &PlayState{
 		sm:           sm,
@@ -38,19 +38,19 @@ func NewPlayState(sm *StateManager) *PlayState {
 
 func (ps *PlayState) MoveLeft() {
 	if ps.drawer.animation.done() {
-		ps.inputManager.Move(game.Left)
+		ps.inputManager.Move(core.Left)
 	}
 }
 
 func (ps *PlayState) MoveRight() {
 	if ps.drawer.animation.done() {
-		ps.inputManager.Move(game.Right)
+		ps.inputManager.Move(core.Right)
 	}
 }
 
 func (ps *PlayState) MoveDown() {
 	if ps.drawer.animation.done() {
-		ps.inputManager.Move(game.Down)
+		ps.inputManager.Move(core.Down)
 	}
 }
 
@@ -62,7 +62,7 @@ func (ps *PlayState) Restart() {
 
 func (ps *PlayState) MoveUp() {
 	if ps.drawer.animation.done() {
-		ps.inputManager.Move(game.Up)
+		ps.inputManager.Move(core.Up)
 	}
 }
 

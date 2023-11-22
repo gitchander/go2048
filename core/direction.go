@@ -1,6 +1,4 @@
-package go2048
-
-import "image"
+package core
 
 type Direction int
 
@@ -15,7 +13,7 @@ func (d Direction) String() string {
 	return dirs[d].name
 }
 
-func (d Direction) getVector() image.Point {
+func (d Direction) getVector() Point {
 	return dirs[d].vector
 }
 
@@ -28,29 +26,29 @@ var directions = [...]Direction{
 
 var dirs = [...]struct {
 	name   string
-	vector image.Point
+	vector Point
 }{
 	Left: {
 		name:   "left",
-		vector: image.Point{-1, 0},
+		vector: MakePoint(-1, 0),
 	},
 	Right: {
 		name:   "right",
-		vector: image.Point{1, 0},
+		vector: MakePoint(1, 0),
 	},
 	Up: {
 		name:   "up",
-		vector: image.Point{0, -1},
+		vector: MakePoint(0, -1),
 	},
 	Down: {
 		name:   "down",
-		vector: image.Point{0, 1},
+		vector: MakePoint(0, 1),
 	},
 }
 
-//var directionVector = map[Direction]image.Point{
-//	Left:  image.Point{-1, 0},
-//	Right: image.Point{1, 0},
-//	Up:    image.Point{0, -1},
-//	Down:  image.Point{0, 1},
+//var directionVector = map[Direction]Point{
+//	Left:  MakePoint(-1, 0),
+//	Right: MakePoint(1, 0),
+//	Up:    MakePoint(0, -1),
+//	Down:  MakePoint(0, 1),
 //}

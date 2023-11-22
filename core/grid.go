@@ -1,20 +1,19 @@
-package go2048
+package core
 
 import (
-	"image"
 	"math/rand"
 )
 
-func DefaultSize() image.Point {
-	return image.Point{4, 4}
+func DefaultSize() Point {
+	return MakePoint(4, 4)
 }
 
 type grid struct {
-	size image.Point
+	size Point
 	sst  [][]*Tile
 }
 
-func newGrid(size image.Point) *grid {
+func newGrid(size Point) *grid {
 	sst := make([][]*Tile, size.X)
 	for x := range sst {
 		sst[x] = make([]*Tile, size.Y)
@@ -25,15 +24,15 @@ func newGrid(size image.Point) *grid {
 	}
 }
 
-func (g *grid) set(cell image.Point, t *Tile) {
+func (g *grid) set(cell Point, t *Tile) {
 	g.sst[cell.X][cell.Y] = t
 }
 
-func (g *grid) get(cell image.Point) *Tile {
+func (g *grid) get(cell Point) *Tile {
 	return g.sst[cell.X][cell.Y]
 }
 
-func (g *grid) Size() image.Point {
+func (g *grid) Size() Point {
 	return g.size
 }
 
@@ -47,16 +46,16 @@ func (g *grid) removeTile(t *Tile) {
 }
 
 // Move a tile and its representation
-func (g *grid) moveTile(t *Tile, cell image.Point) {
+func (g *grid) moveTile(t *Tile, cell Point) {
 	g.set(t.Position, nil)
 	g.set(cell, t)
 	t.updatePosition(cell)
 }
 
-func (g *grid) rangeCells(f func(cell image.Point, t *Tile) bool) {
+func (g *grid) rangeCells(f func(cell Point, t *Tile) bool) {
 	for x, st := range g.sst {
 		for y, t := range st {
-			cell := image.Point{x, y}
+			cell := MakePoint(x, y)
 			if not(f(cell, t)) {
 				return
 			}
@@ -79,7 +78,7 @@ func (g *grid) rangeTiles(f func(*Tile) bool) {
 // Check if there are any cells available
 func (g *grid) hasAvailableCells() (ok bool) {
 	g.rangeCells(
-		func(cell image.Point, t *Tile) bool {
+		func(cell Point, t *Tile) bool {
 			if t == nil {
 				ok = true
 				return false
@@ -89,9 +88,9 @@ func (g *grid) hasAvailableCells() (ok bool) {
 	return
 }
 
-func (g *grid) availableCells() (cells []image.Point) {
+func (g *grid) availableCells() (cells []Point) {
 	g.rangeCells(
-		func(cell image.Point, t *Tile) bool {
+		func(cell Point, t *Tile) bool {
 			if t == nil {
 				cells = append(cells, cell)
 			}
@@ -101,15 +100,15 @@ func (g *grid) availableCells() (cells []image.Point) {
 }
 
 // Check if the specified cell is taken
-func (g *grid) cellAvailable(cell image.Point) bool {
+func (g *grid) cellAvailable(cell Point) bool {
 	return not(g.cellOccupied(cell))
 }
 
-func (g *grid) cellOccupied(cell image.Point) bool {
+func (g *grid) cellOccupied(cell Point) bool {
 	return g.cellContent(cell) != nil
 }
 
-func (g *grid) cellContent(cell image.Point) *Tile {
+func (g *grid) cellContent(cell Point) *Tile {
 	if g.withinBounds(cell) {
 		return g.get(cell)
 	}
@@ -117,14 +116,14 @@ func (g *grid) cellContent(cell image.Point) *Tile {
 }
 
 // Use for encodePrintable
-func (g *grid) CellValue(cell image.Point) (val int, ok bool) {
+func (g *grid) CellValue(cell Point) (val int, ok bool) {
 	if v := g.cellContent(cell); v != nil {
 		return v.Value, true
 	}
 	return 0, false
 }
 
-func (g *grid) withinBounds(cell image.Point) bool {
+func (g *grid) withinBounds(cell Point) bool {
 
 	if (cell.X < 0) || (g.size.X <= cell.X) {
 		return false
@@ -169,7 +168,7 @@ func (g *grid) resetTiles() {
 // Check for available matches between tiles (more expensive check)
 func (g *grid) tileMatchesAvailable() (ok bool) {
 	g.rangeCells(
-		func(cell image.Point, t *Tile) bool {
+		func(cell Point, t *Tile) bool {
 			if t != nil {
 				for _, d := range directions {
 					vector := d.getVector()
@@ -190,12 +189,12 @@ func (g *grid) movesAvailable() bool {
 }
 
 type positions struct {
-	farthest, next image.Point
+	farthest, next Point
 }
 
-func (g *grid) findFarthestPosition(cell, vector image.Point) positions {
+func (g *grid) findFarthestPosition(cell, vector Point) positions {
 
-	var previous image.Point
+	var previous Point
 
 	// Progress towards the vector direction until an obstacle is found
 	for {

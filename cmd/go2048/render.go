@@ -6,7 +6,7 @@ import (
 
 	"github.com/nsf/termbox-go"
 
-	game "github.com/gitchander/go2048"
+	"github.com/gitchander/go2048/core"
 )
 
 type animationInfo struct {
@@ -28,12 +28,12 @@ type Drawer struct {
 	animation animationInfo
 
 	score, bestScore int
-	mk               game.MessageKind
+	mk               core.MessageKind
 	gd               *gridDrawer
 	td               *tilesDrawer
 }
 
-//func NewDrawer(gridSize, cellSize image.Point) *Drawer {
+// func NewDrawer(gridSize, cellSize image.Point) *Drawer {
 func NewDrawer(cellSize image.Point) *Drawer {
 
 	return &Drawer{
@@ -80,7 +80,7 @@ func (d *Drawer) Init(gridSize image.Point) {
 		//fg:       termbox.ColorCyan | termbox.AttrBold,
 		fg:    termbox.ColorLightCyan | termbox.AttrBold,
 		bg:    termbox.ColorCyan,
-		table: game.BorderTable(5),
+		table: core.BorderTable(5),
 	}
 	d.td = &tilesDrawer{
 		gridSize: gridSize,
@@ -95,7 +95,7 @@ func (d *Drawer) Init(gridSize image.Point) {
 	d.gd.SetScreenSize(d.screenSize)
 }
 
-func (a *Drawer) AnimationRequest(tiles []*game.Tile) {
+func (a *Drawer) AnimationRequest(tiles []*core.Tile) {
 
 	a.animation.start = getTime()
 	a.animation.inProgress = true
@@ -115,7 +115,7 @@ func (a *Drawer) UpdateBestScore(bestScore int) {
 	a.bestScore = bestScore
 }
 
-func (a *Drawer) Message(mk game.MessageKind) {
+func (a *Drawer) Message(mk core.MessageKind) {
 	a.mk = mk
 }
 
@@ -159,7 +159,8 @@ var controls = []string{
 	"   esc - quit",
 }
 
-func renderScore(tbSize, gridSize, cellSize image.Point, score, bestScore int, mk game.MessageKind) {
+func renderScore(tbSize, gridSize, cellSize image.Point, score,
+	bestScore int, mk core.MessageKind) {
 
 	var dx, dy = gridSize.X, gridSize.Y
 
@@ -188,10 +189,10 @@ func renderScore(tbSize, gridSize, cellSize image.Point, score, bestScore int, m
 	d.Border(image.Rect(x0, y0+gDy+1, x0+gDx, y0+gDy+5+len(controls)))
 
 	switch mk {
-	case game.MK_YOU_LOSE:
+	case core.MK_YOU_LOSE:
 		d.Fg = termbox.ColorRed | termbox.AttrBold
 		d.Text(image.Point{x0 + 2, y0 + gDy + 2}, mk.String())
-	case game.MK_YOU_WIN:
+	case core.MK_YOU_WIN:
 		d.Fg = termbox.ColorGreen | termbox.AttrBold
 		d.Text(image.Point{x0 + 2, y0 + gDy + 2}, mk.String())
 	}

@@ -1,22 +1,21 @@
-package go2048
+package core
 
 import (
 	"bytes"
-	"image"
 )
 
 type cellContenter interface {
-	Size() image.Point
-	CellValue(cell image.Point) (val int, ok bool)
+	Size() Point
+	CellValue(cell Point) (val int, ok bool)
 }
 
-type dummyCellContenter image.Point
+type dummyCellContenter Point
 
-func (c dummyCellContenter) Size() image.Point {
-	return image.Point(c)
+func (c dummyCellContenter) Size() Point {
+	return Point(c)
 }
 
-func (c dummyCellContenter) CellValue(cell image.Point) (val int, ok bool) {
+func (c dummyCellContenter) CellValue(cell Point) (val int, ok bool) {
 	return 0, false
 }
 
@@ -26,7 +25,7 @@ func encodePrintableTest(g *grid) []byte {
 
 func encodePrintable(cc cellContenter, prefix string, ssr [][]rune) []byte {
 
-	var cellSize = image.Point{X: 5, Y: 1}
+	var cellSize = Point{X: 5, Y: 1}
 
 	pe := newPrintEncoder(cellSize, prefix, cc, ssr)
 
@@ -34,14 +33,14 @@ func encodePrintable(cc cellContenter, prefix string, ssr [][]rune) []byte {
 }
 
 type printEncoder struct {
-	gridSize image.Point
-	cellSize image.Point
+	gridSize Point
+	cellSize Point
 	prefix   string
 	cc       cellContenter
 	ssr      [][]rune
 }
 
-func newPrintEncoder(cellSize image.Point, prefix string,
+func newPrintEncoder(cellSize Point, prefix string,
 	cc cellContenter, ssr [][]rune) *printEncoder {
 
 	if cellSize.X < 1 {
@@ -138,7 +137,7 @@ func (pe *printEncoder) writeLineVal(buf *bytes.Buffer, sr []rune, y int) {
 			buf.WriteRune(sr[0])
 		}
 
-		if val, ok := pe.cc.CellValue(image.Point{x, y}); ok {
+		if val, ok := pe.cc.CellValue(Point{x, y}); ok {
 			if cellWidth >= 4+2 {
 				buf.WriteRune(sr[1])
 				buf.WriteString(itoaN(val, cellWidth-2, byte(sr[1])))

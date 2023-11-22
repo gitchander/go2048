@@ -1,9 +1,8 @@
-package go2048
+package core
 
 import (
 	"bytes"
 	"fmt"
-	"image"
 	"testing"
 
 	"encoding/hex"
@@ -32,9 +31,9 @@ func TestPrintable(t *testing.T) {
 		"\tEFFFFFFFGFFFFFFFGFFFFFFFH\n" +
 		"\tMNNNNNNNONNNNNNNONNNNNNNP\n")
 
-	cc := dummyCellContenter(image.Point{X: 3, Y: 3})
+	cc := dummyCellContenter(MakePoint(3, 3))
 
-	var cellSize = image.Point{X: 7, Y: 3}
+	var cellSize = MakePoint(7, 3)
 
 	pe := newPrintEncoder(cellSize, "\t", cc, tableRuneTest)
 	data := pe.Encode()

@@ -5,7 +5,7 @@ import (
 
 	"github.com/nsf/termbox-go"
 
-	game "github.com/gitchander/go2048"
+	"github.com/gitchander/go2048/core"
 )
 
 type imageDrawer struct {
@@ -39,7 +39,7 @@ func (d *imageDrawer) Border(bounds image.Rectangle) {
 		}
 	}
 
-	table := game.BorderTable(1)
+	table := core.BorderTable(1)
 
 	y := bounds.Min.Y
 	if y < bounds.Max.Y {

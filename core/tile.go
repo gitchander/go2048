@@ -1,16 +1,14 @@
-package go2048
-
-import "image"
+package core
 
 type Tile struct {
-	Position image.Point
+	Position Point
 	Value    int
 
-	PreviousPosition *image.Point `json:"-"`
-	MergedFrom       []*Tile      `json:"-"`
+	PreviousPosition *Point  `json:"-"`
+	MergedFrom       []*Tile `json:"-"`
 }
 
-func newTile(position image.Point, value int) *Tile {
+func newTile(position Point, value int) *Tile {
 	return &Tile{
 		Position: position,
 		Value:    value,
@@ -22,13 +20,13 @@ func (t *Tile) reset() {
 	t.MergedFrom = nil
 }
 
-func (t *Tile) updatePosition(position image.Point) {
+func (t *Tile) updatePosition(position Point) {
 	var prevPos = t.Position
 	t.PreviousPosition = &prevPos
 	t.Position = position
 }
 
-func mergeTiles(pos image.Point, ts ...*Tile) *Tile {
+func mergeTiles(pos Point, ts ...*Tile) *Tile {
 	var sum int
 	for _, t := range ts {
 		sum += t.Value

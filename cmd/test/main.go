@@ -7,12 +7,12 @@ import (
 	"os"
 	"strings"
 
-	pot "github.com/gitchander/go2048"
+	"github.com/gitchander/go2048/core"
 )
 
 func main() {
-	ms := pot.NewMapStorage()
-	gm := pot.NewGameManager(ms, pot.DummyHandler{})
+	ms := core.NewMapStorage()
+	gm := core.NewGameManager(ms, core.DummyHandler{})
 	printGrid(gm)
 
 	r := bufio.NewReader(os.Stdin)
@@ -31,13 +31,13 @@ func main() {
 		case "":
 			// do nothing
 		case "a", "A":
-			gm.Move(pot.Left)
+			gm.Move(core.Left)
 		case "d", "D":
-			gm.Move(pot.Right)
+			gm.Move(core.Right)
 		case "w", "W":
-			gm.Move(pot.Up)
+			gm.Move(core.Up)
 		case "s", "S":
-			gm.Move(pot.Down)
+			gm.Move(core.Down)
 		case "q", "Q":
 			fallthrough
 		case "e", "E":
@@ -50,6 +50,6 @@ func main() {
 	}
 }
 
-func printGrid(gm *pot.GameManager) {
+func printGrid(gm *core.GameManager) {
 	fmt.Print(string(gm.PrintableGrid()))
 }

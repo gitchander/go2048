@@ -1,4 +1,4 @@
-package go2048
+package core
 
 import "errors"
 

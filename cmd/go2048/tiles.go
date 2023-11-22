@@ -5,7 +5,7 @@ import (
 
 	"github.com/nsf/termbox-go"
 
-	game "github.com/gitchander/go2048"
+	"github.com/gitchander/go2048/core"
 )
 
 type tilesDrawer struct {
@@ -14,7 +14,7 @@ type tilesDrawer struct {
 	cellSize   image.Point
 	fg, bg     termbox.Attribute
 	valueRunes map[int][]rune
-	tiles      []*game.Tile
+	tiles      []*core.Tile
 }
 
 func (td *tilesDrawer) SetScreenSize(size image.Point) {

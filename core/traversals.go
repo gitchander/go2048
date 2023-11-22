@@ -1,8 +1,6 @@
-package go2048
+package core
 
 import (
-	"image"
-
 	"github.com/gitchander/go2048/utils"
 )
 
@@ -13,7 +11,7 @@ type traversals struct {
 }
 
 // Build a list of positions to traverse in the right order
-func newTraversals(size image.Point, d Direction) *traversals {
+func newTraversals(size Point, d Direction) *traversals {
 
 	t := &traversals{
 		xs: serialInts(size.X),
@@ -33,17 +31,17 @@ func newTraversals(size image.Point, d Direction) *traversals {
 	return t
 }
 
-func (t *traversals) Range(f func(image.Point) bool) {
+func (t *traversals) Range(f func(Point) bool) {
 	for _, x := range t.xs {
 		for _, y := range t.ys {
-			if not(f(image.Pt(x, y))) {
+			if not(f(MakePoint(x, y))) {
 				return
 			}
 		}
 	}
 }
 
-func makeMapTraversals(size image.Point) map[Direction]*traversals {
+func makeMapTraversals(size Point) map[Direction]*traversals {
 	m := make(map[Direction]*traversals)
 	for _, d := range directions {
 		m[d] = newTraversals(size, d)

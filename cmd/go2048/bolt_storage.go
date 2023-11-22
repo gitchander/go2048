@@ -5,7 +5,7 @@ import (
 
 	"github.com/boltdb/bolt"
 
-	game "github.com/gitchander/go2048"
+	"github.com/gitchander/go2048/core"
 )
 
 type BoltStorage struct {
@@ -13,7 +13,7 @@ type BoltStorage struct {
 	bucketName []byte
 }
 
-var _ game.Storage = &BoltStorage{}
+var _ core.Storage = &BoltStorage{}
 
 func NewBoltStorage(filename string) (*BoltStorage, error) {
 

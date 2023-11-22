@@ -6,18 +6,18 @@ import (
 
 	"github.com/nsf/termbox-go"
 
-	game "github.com/gitchander/go2048"
+	"github.com/gitchander/go2048/core"
 )
 
 type StateManager struct {
-	storage    game.Storage
+	storage    core.Storage
 	screenSize image.Point
 	f_quit     bool
 	states     map[string]State
 	active     State
 }
 
-func NewStateManager(storage game.Storage) *StateManager {
+func NewStateManager(storage core.Storage) *StateManager {
 	return &StateManager{
 		storage: storage,
 		states:  make(map[string]State),
